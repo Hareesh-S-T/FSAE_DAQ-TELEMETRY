@@ -1,9 +1,11 @@
 const int gearPins[] = {2, 3, 4, 5, 6, 7};
 #define coolantPin A0
 #define fuelPin A1
+#define tachPin 8
 
 int coolantTemp = 0;
 int fuelLevel = 0;
+int rpm = 0;
 
 void setup() {
   Serial1.begin(9600);
@@ -34,7 +36,14 @@ void loop() {
   Serial1.print("gear.txt=");
   Serial1.print("\"");
   Serial1.print(gear);
-  Serial.print(gear);
+  Serial1.print("\"");
+  Serial1.write(0xff);
+  Serial1.write(0xff);
+  Serial1.write(0xff);
+
+  Serial1.print("rpm.val=");
+  Serial1.print("\"");
+  Serial1.print(rpm);
   Serial1.print("\"");
   Serial1.write(0xff);
   Serial1.write(0xff);

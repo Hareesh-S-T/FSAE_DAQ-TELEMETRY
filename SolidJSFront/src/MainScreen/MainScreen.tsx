@@ -1,6 +1,8 @@
 import { createSignal, onCleanup, Show } from 'solid-js';
 import mqtt from 'mqtt';
 import LineChart from '../Components/LineChart/LineChart.jsx';
+import axios from 'axios';
+
 
 import './MainScreen.css';
 
@@ -21,7 +23,7 @@ interface mqttMessage {
 }
 
 export default function MainScreen() {
-    const canvasProperties = ["coolantTemp", "damperTravel", "wheelTravel"];
+    const canvasProperties = ["coolantTemp", "damperTravel", "wheelTravel", "fuelLevel"];
 
     const [connectionConf, setConnectionConf] = createSignal<ConnectionConfig>({
         port: '',
@@ -47,19 +49,38 @@ export default function MainScreen() {
         fuelLevel: undefined
     }]);
     const [isConnected, setIsConnected] = createSignal(false);
+    const [isLogging, setIsLogging] = createSignal(false);
 
     const handleInput = (key: keyof ConnectionConfig) => (e: Event) => {
         setConnectionConf((prev) => ({ ...prev, [key]: (e.target as HTMLInputElement).value }));
     };
 
+    const handleLogging = () => {
+        if (isLogging()) {
+            axios.get('http://localhost:8080/stopLogging');
+            console.log(isLogging());
+            setIsLogging(false);
+        } else {
+            axios.get('http://localhost:8080/startLogging');
+            console.log(isLogging());
+            setIsLogging(true);
+        }
+
+    }
+
     async function connect(e: Event) {
         e.preventDefault(); //Prevents default behaviour of reloading the page when submitting form
-        console.log(connectionConf());
+        // console.log(connectionConf());
 
         const client = mqtt.connect(`ws://${connectionConf().connectionString}:${connectionConf().port}/mqtt`)
 
         client.on('connect', () => {
             console.log('Connected to MQTT broker');
+            try {
+                axios.post('http://localhost:8080/connectMQTT', connectionConf());
+            } catch (error) {
+                console.log(error);
+            }
             client.subscribe(connectionConf().topic);
             setIsConnected(true);
         });
@@ -156,10 +177,21 @@ export default function MainScreen() {
                         </form>
                     </div>
                 }>
-                <div class='containerChart'>
-                    {canvasProperties.map((property) => (
-                        <LineChart property={property} data={streamingData} class='lineChart' />
-                    ))}
+
+                <div id='container'>
+                    <div class='headerPanel'>
+                        <img src='/SR_White_Full.png' alt='Logo' class='SRLogo-header' />
+
+                        <h1>DAQ & Telemetry</h1>
+
+                        <button class='loggingButton' onClick={() => handleLogging()}>{isLogging() ? 'Stop' : 'Record'}</button>
+
+                    </div>
+                    <div class='containerChart'>
+                        {canvasProperties.map((property) => (
+                            <LineChart property={property} data={streamingData} class='lineChart' />
+                        ))}
+                    </div>
                 </div>
             </Show>
 

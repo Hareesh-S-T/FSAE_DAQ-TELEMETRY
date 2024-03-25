@@ -6,7 +6,6 @@ const chartInstances = {};
 
 export default function LineChart({ property, data, class: additionalClass }) {
   const [canvasRef, setCanvasRef] = createSignal(null);
-
   onCleanup(() => {
     const canvas = canvasRef()?.[0];
     const ctx = canvas?.getContext("2d");

@@ -6,7 +6,7 @@
 :root {
   font-family: Arial, sans-serif;
   letter-spacing: 0.05rem;
-  color: #fdfdfd;
+  color: #ffffff;
   color-scheme: dark;
   max-width: 100vw;
   background-color: #242424;
@@ -14,6 +14,11 @@
 
 body {
   height: 100vh;
+}
+
+h1 {
+  margin: 0 1rem;
+  font-style: italic;
 }
 
 /* button {
